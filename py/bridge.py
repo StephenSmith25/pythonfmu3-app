@@ -138,6 +138,13 @@ def templates(args):
     return items
 
 
+def template_source(args):
+    key = args["id"]
+    if key not in TEMPLATE_INFO:
+        raise KeyError(f"unknown template {key!r}; choose from {', '.join(TEMPLATE_INFO)}")
+    return {"id": key, "content": (TEMPLATES / f"{key}.py").read_text(encoding="utf-8")}
+
+
 def use_template(args):
     key = args["id"]
     if key not in TEMPLATE_INFO:
@@ -160,7 +167,8 @@ def export_zip(args):
 
 
 COMMANDS = {f.__name__: f for f in (env, files, read, write, delete, analyze, simulate, build,
-                                    inspect, validate, templates, use_template, export_zip)}
+                                    inspect, validate, templates, template_source, use_template,
+                                    export_zip)}
 
 
 def call(command: str, args_json: str) -> str:

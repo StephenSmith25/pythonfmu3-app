@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.anthropic.com; base-uri 'none'; form-action 'none'">
 <meta name="description" content="Write, check, simulate and build FMI 3.0 FMUs from Python, entirely in your browser.">
 <title>PythonFMU3 Studio</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="app.css">
 <script src="app.js" defer></script>
+<script src="agent.js" defer></script>
 </head>
 <body>
 <div id="loading" class="loading" role="status" aria-live="polite">
@@ -28,6 +29,7 @@
     <button type="button" class="tab" data-view="simulate">Simulate</button>
     <button type="button" class="tab" data-view="inspector">Inspector</button>
     <button type="button" class="tab" data-view="templates">Templates</button>
+    <button type="button" class="tab" data-view="assistant">Assistant <span class="tag-new">AI</span></button>
   </nav>
   <div class="spacer"></div>
   <div class="actions">
@@ -142,6 +144,55 @@
       <div id="tpl-cats" class="chips" role="group" aria-label="Filter by category"></div>
     </div>
     <div id="tpl-grid" class="cards"></div>
+  </section>
+
+  <!-- Assistant -->
+  <section id="view-assistant" class="view assistant" aria-label="Assistant" hidden>
+    <div class="agent-head">
+      <div>
+        <h1>Assistant</h1>
+        <p class="muted">Describe a model and Claude writes it, checks it, simulates it and fixes what goes wrong. You can keep editing the result.</p>
+      </div>
+      <div class="agent-controls">
+        <label class="file-picker"><span class="sr-only">Model</span><select id="agent-model"></select></label>
+        <button type="button" class="btn" id="agent-new">New chat</button>
+      </div>
+    </div>
+
+    <form id="agent-key-form" class="panel agent-key">
+      <h2>Connect your Anthropic API key</h2>
+      <p>The Assistant runs on Claude through your own API key, and usage is billed to your Anthropic account. The key is only sent to Anthropic's API, straight from this browser. Get one from the <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Claude Console</a>.</p>
+      <div class="agent-key-row">
+        <label class="grow"><span class="sr-only">API key</span><input id="agent-key" type="password" placeholder="sk-ant-…" autocomplete="off" spellcheck="false"></label>
+        <button type="submit" class="btn primary">Save key</button>
+      </div>
+      <label class="check"><input id="agent-remember" type="checkbox" checked> Remember it in this browser</label>
+    </form>
+
+    <div id="agent-chat" class="panel agent-chat" hidden>
+      <div id="agent-log" class="agent-log" aria-live="polite"></div>
+      <div id="agent-empty" class="agent-empty">
+        <p class="muted">Try one of these, or describe your own model:</p>
+        <div class="agent-suggestions">
+          <button type="button" class="agent-suggest">A water tank with an inflow input, a drain valve parameter and the level as output</button>
+          <button type="button" class="agent-suggest">A spring–mass–damper as a Model Exchange FMU</button>
+          <button type="button" class="agent-suggest">A first-order thermal model of a room heated by a radiator, in °C</button>
+          <button type="button" class="agent-suggest">Fix the problems in the model I have open</button>
+        </div>
+      </div>
+      <form id="agent-form" class="agent-composer">
+        <label class="sr-only" for="agent-input">Message</label>
+        <textarea id="agent-input" rows="2" placeholder="Describe the model you want, or ask for a change… (Enter to send, Shift+Enter for a new line)"></textarea>
+        <button type="submit" class="btn primary" id="agent-send">Send</button>
+        <button type="button" class="btn" id="agent-stop" hidden>Stop</button>
+      </form>
+      <div class="agent-foot muted small">
+        <span id="agent-key-status"></span>
+        <button type="button" class="linkish" id="agent-forget" hidden>Forget key</button>
+        <span class="spacer"></span>
+        <span>Your model code is sent to Anthropic while you use the Assistant.</span>
+      </div>
+    </div>
   </section>
 </main>
 

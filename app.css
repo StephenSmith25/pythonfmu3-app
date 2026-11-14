@@ -190,3 +190,48 @@ legend { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 
 .code-btn:hover { border-color: #7FB0DE; }
 .linkish { border: none; background: none; padding: 0; color: var(--blue); font: inherit; text-decoration: underline; cursor: pointer; }
 .statusbar a { color: var(--blue); }
+
+/* assistant */
+.tag-new { margin-left: 4px; padding: 1px 6px; border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 11px; font-weight: 700; }
+.view.assistant { max-width: 920px; margin: 0 auto; width: 100%; }
+.agent-head { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.agent-head p { margin: 0; max-width: 60ch; }
+.agent-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.agent-key { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.agent-key p { margin: 0; max-width: 70ch; line-height: 1.5; }
+.agent-key-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.agent-key-row input { width: 100%; min-height: 38px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: 8px; font-family: var(--mono); }
+.agent-key .check { display: flex; gap: 8px; align-items: center; }
+.agent-chat { display: flex; flex-direction: column; min-height: 520px; height: calc(100vh - 250px); }
+.agent-log { flex: 1 1 auto; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.agent-empty { padding: 0 18px 12px; }
+.agent-suggestions { display: flex; flex-wrap: wrap; gap: 8px; }
+.agent-suggest { text-align: left; padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: #fff; cursor: pointer; max-width: 100%; }
+.agent-suggest:hover { border-color: var(--blue); background: var(--blue-soft); }
+.msg { max-width: 82%; padding: 10px 14px; border-radius: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.msg p { margin: 0 0 8px; } .msg p:last-child { margin-bottom: 0; }
+.msg ul, .msg ol { margin: 0 0 8px; padding-left: 20px; }
+.msg pre { margin: 0 0 8px; padding: 10px; border-radius: 8px; background: var(--code-bg); color: var(--code-fg); font-family: var(--mono); font-size: 12px; overflow-x: auto; }
+.msg code { font-family: var(--mono); font-size: 12.5px; background: var(--bg); padding: 1px 4px; border-radius: 4px; }
+.msg.user { align-self: flex-end; background: var(--blue); color: #fff; white-space: pre-wrap; }
+.msg.assistant { align-self: flex-start; background: var(--bg); }
+.msg.thinking { align-self: flex-start; color: var(--muted); display: flex; gap: 8px; align-items: center; padding: 6px 2px; }
+.dots { width: 26px; height: 8px; background: radial-gradient(circle, var(--blue) 3px, transparent 3.5px) 0 0 / 9px 8px repeat-x; animation: dots 1s steps(3) infinite; }
+@keyframes dots { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.step { align-self: flex-start; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; max-width: 100%; }
+.step-label { font-family: var(--mono); font-size: 12.5px; }
+.step-out { color: var(--muted); }
+.step-icon { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); flex: none; }
+.step.running .step-icon { background: var(--gold); animation: pulse 1s ease-in-out infinite; }
+.step.ok .step-icon { background: var(--ok); }
+.step.warn .step-icon { background: var(--gold); }
+.step.bad { border-color: #F5C2BE; } .step.bad .step-icon { background: var(--err); } .step.bad .step-out { color: var(--err); }
+.step details { flex-basis: 100%; } .step pre { max-height: 200px; overflow: auto; font-size: 11.5px; white-space: pre-wrap; margin: 6px 0 0; }
+@keyframes pulse { 50% { opacity: 0.35; } }
+.agent-note { align-self: center; color: var(--muted); font-size: 13px; text-align: center; }
+.agent-note.bad { color: var(--err); background: var(--err-bg); padding: 6px 12px; border-radius: 8px; }
+.agent-composer { display: flex; gap: 8px; align-items: flex-end; padding: 12px; border-top: 1px solid var(--line); }
+.agent-composer textarea { flex: 1 1 auto; resize: vertical; min-height: 44px; max-height: 240px; padding: 10px; border: 1px solid var(--line-2); border-radius: 8px; line-height: 1.4; }
+.agent-foot { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 12px 10px; }
+@media (max-width: 640px) { .msg { max-width: 100%; } .agent-chat { height: auto; min-height: 70vh; } }
+@media (prefers-reduced-motion: reduce) { .dots, .step.running .step-icon { animation: none; } }

@@ -110,10 +110,11 @@ function show(view) {
   for (const b of document.querySelectorAll(".tab")) {
     if (b.dataset.view === view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   }
-  for (const v of ["editor", "simulate", "inspector", "templates"]) $("#view-" + v).hidden = v !== view;
+  for (const v of ["editor", "simulate", "inspector", "templates", "assistant"]) $("#view-" + v).hidden = v !== view;
   if (view === "simulate") renderSimSettings();
   if (view === "templates" && !S.templates.length) loadTemplates();
   if (view === "inspector") refreshFmuSelect();
+  if (view === "assistant" && !$("#agent-input").disabled) setTimeout(() => (A.key ? $("#agent-input") : $("#agent-key")).focus(), 0);
 }
 
 /* ---------- files and editor ---------- */
@@ -128,7 +129,7 @@ async function loadFiles(select) {
     [el("option", { value: "", text: "No .py files – use a template" })]));
   const target = select || S.path || (py[0] && py[0].path);
   if (target) { sel.value = target; if (target !== S.path) await openFile(target); }
-  else if (!py.length) { show("templates"); banner("info", "Welcome! Pick a template to start, or press New in the editor."); }
+  else if (!py.length) { show("templates"); banner("info", "Welcome! Pick a template to start, press New in the editor, or describe a model to the Assistant."); }
 }
 
 async function openFile(path) {

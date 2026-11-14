@@ -46,7 +46,7 @@ jobs:
       - name: Assemble the site
         run: |
           mkdir -p _site
-          cp index.html app.js app.css worker.js logo.svg _site/
+          cp index.html app.js agent.js app.css worker.js logo.svg _site/
           cp -r py wheels _site/
           touch _site/.nojekyll
 

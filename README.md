@@ -16,15 +16,30 @@ with [Pyodide](https://pyodide.org), so it's a static site with no server.
 | Build and download FMUs | Yes (Windows and Linux binaries from the PyPI package) | Yes (your local build) |
 | Inspector for any FMU | Yes | Yes |
 | Templates | Yes | Yes |
+| AI Assistant that writes, checks, simulates and fixes models | Yes (your Anthropic API key) | No |
 | Simulate the FMU in fmusim or FMPy | No | Yes |
 | Models importing packages Pyodide doesn't have (e.g. PyTorch) | No | Yes |
 | Where files live | This browser (download them, or export a .zip) | A folder on your computer |
+
+## The Assistant
+
+The **Assistant** tab is a Claude agent that designs models for you. Describe what you
+want ("a water tank with an inflow input and the level as output") and it writes the
+model, runs the Studio's checks, simulates it, fixes whatever fails and builds the FMU.
+The file opens in the editor, so you can keep working on it yourself.
+
+It uses your own [Anthropic API key](https://console.anthropic.com/settings/keys): the
+key is kept in this browser (if you tick *Remember*) and sent only to Anthropic's API,
+and usage is billed to your account. Your model code is sent to Anthropic while you use
+the Assistant; nothing else in the app leaves your browser.
 
 ## How it works
 
 - `index.html`, `app.js`, `app.css`: the Studio interface (plain JavaScript).
 - `worker.js`: a Web Worker that loads Pyodide, keeps your files in the browser's
   IndexedDB, installs the PythonFMU3 wheel, and runs Python off the main thread.
+- `agent.js`: the Assistant. It calls the Anthropic Messages API from the browser, with
+  tools that map onto the same bridge commands the Studio's buttons use.
 - `py/bridge.py`: the Python side. It calls PythonFMU3's own Studio code
   (`pythonfmu3.studio.worker`), so both versions behave the same.
 - `wheels/`: the PythonFMU3 wheel the app runs. Not committed: the deploy workflow
@@ -60,4 +75,4 @@ http://localhost:8000/?pyodide=./pyodide/.
 ## Privacy
 
 Everything runs in your browser. Your models are stored in this browser's IndexedDB and
-are never uploaded. The page loads Pyodide from the jsDelivr CDN.
+are never uploaded, except to Anthropic's API while you use the Assistant. The page loads Pyodide from the jsDelivr CDN.
