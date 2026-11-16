@@ -235,3 +235,7 @@ legend { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 
 .agent-foot { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 12px 10px; }
 @media (max-width: 640px) { .msg { max-width: 100%; } .agent-chat { height: auto; min-height: 70vh; } }
 @media (prefers-reduced-motion: reduce) { .dots, .step.running .step-icon { animation: none; } }
+
+/* share links */
+.share-note { display: flex; flex-direction: column; gap: 6px; flex: 1 1 320px; min-width: 0; }
+.share-url { width: 100%; min-height: 34px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: 6px; font-family: var(--mono); font-size: 12px; background: #fff; color: var(--ink); }

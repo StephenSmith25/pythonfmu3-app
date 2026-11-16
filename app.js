@@ -647,6 +647,7 @@ async function init() {
   $("#py-input").addEventListener("change", (e) => uploadPy(e.target.files[0]));
   $("#btn-download-py").addEventListener("click", () => S.path && downloadFile(S.path));
   $("#btn-delete").addEventListener("click", deleteFile);
+  $("#btn-share").addEventListener("click", shareLink);
   $("#btn-export").addEventListener("click", async () => {
     const r = await rpc("export_zip");
     if (r.ok) downloadFile(r.result.file, true, "pythonfmu3-models.zip");
@@ -657,6 +658,7 @@ async function init() {
   await loadFiles();
   renderCharts();
   $("#loading").hidden = true;
+  await handleIncomingLink();
 }
 
 const NEW_MODEL = `from pythonfmu3 import Fmi3Causality, Fmi3Slave, Fmi3Variability, Float64
@@ -720,6 +722,102 @@ async function deleteFile() {
   $("#code").value = ""; $("#code-name").textContent = "No file open";
   updateGutter(); updateDirty(); renderAnalysis();
   await loadFiles();
+}
+
+/* ---------- shareable links ----------
+   A shared model travels in the URL fragment (#model=...&name=...), which browsers never
+   send to a server. The code is deflate-compressed and base64url-encoded. */
+
+const SHARE_WARN_LENGTH = 8000;    // longer links may be cut off by chat apps and email
+
+function toBase64Url(bytes) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function fromBase64Url(text) {
+  const bin = atob(text.replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+}
+
+async function transform(bytes, stream) {
+  return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
+}
+
+async function encodeModel(code) {
+  return toBase64Url(await transform(new TextEncoder().encode(code), new CompressionStream("deflate-raw")));
+}
+
+async function decodeModel(payload) {
+  return new TextDecoder().decode(await transform(fromBase64Url(payload), new DecompressionStream("deflate-raw")));
+}
+
+async function shareLink() {
+  if (!S.path) return banner("info", "Open a model first");
+  if (dirty()) await save();
+  const params = new URLSearchParams({ name: S.path.split("/").pop(), model: await encodeModel($("#code").value) });
+  const url = `${location.origin}${location.pathname}#${params}`;
+  let copied = false;
+  try { await navigator.clipboard.writeText(url); copied = true; } catch { /* clipboard blocked */ }
+  const box = el("input", { type: "text", readonly: true, class: "share-url", value: url, "aria-label": "Share link" });
+  box.addEventListener("focus", () => box.select());
+  const long = url.length > SHARE_WARN_LENGTH ? ` It's ${Math.round(url.length / 1000)}k characters long, so some chat apps may cut it off; downloading the file is safer.` : "";
+  banner("ok", copied ? "Link copied." : "Copy this link:", null,
+    el("span", { class: "share-note" }, `Anyone who opens it gets a copy of ${S.path} in their own browser.${long}`, box));
+  if (!copied) box.focus();
+}
+
+function clearLink() {
+  const query = new URLSearchParams(location.search);
+  query.delete("example");
+  history.replaceState(null, "", location.pathname + (query.size ? `?${query}` : ""));
+}
+
+async function openSharedModel(name, code) {
+  const base = safeName(name.replace(/\.py$/, "")) || "shared_model";
+  const same = S.files.find((f) => f.path === `${base}.py`);
+  let target = freeName(base);
+  if (same) {
+    const r = await rpc("read", { path: same.path });
+    if (r.ok && r.result.content === code) target = same.path;   // already have it
+  }
+  if (target !== (same && same.path)) {
+    const w = await rpc("write", { path: target, content: code });
+    if (!w.ok) return banner("error", "Could not save the shared model", w.error);
+  }
+  S.path = null;
+  await loadFiles(target);
+  show("editor");
+  banner("ok", `Opened ${target}. It's saved in this browser, so you can edit, simulate and build it.`);
+}
+
+/* Shared code is Python that runs in this browser tab, so show it before running it. */
+async function handleIncomingLink() {
+  const query = new URLSearchParams(location.search);
+  const example = query.get("example");
+  if (example) {
+    clearLink();
+    if (!S.templates.length) await loadTemplates();
+    const t = S.templates.find((x) => x.id === example);
+    if (t) return useTemplate(t);
+    return banner("error", `There's no example called "${example}"`);
+  }
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const payload = hash.get("model");
+  if (!payload) return;
+  const name = hash.get("name") || "shared_model.py";
+  clearLink();
+  let code;
+  try {
+    code = await decodeModel(payload);
+  } catch {
+    return banner("error", "This share link is damaged or incomplete", "Ask for the link again, or for the .py file.");
+  }
+  show("editor");
+  const actions = el("button", { type: "button", class: "btn primary", onClick: () => openSharedModel(name, code) }, "Open it");
+  banner("info", `Someone shared ${safeName(name)} with you. Check the code below before opening it: it will run as Python in this browser tab.`,
+    code, actions);
 }
 
 init();

@@ -15,11 +15,33 @@ with [Pyodide](https://pyodide.org), so it's a static site with no server.
 | Python-preview simulation with sliders and plots | Yes | Yes |
 | Build and download FMUs | Yes (Windows and Linux binaries from the PyPI package) | Yes (your local build) |
 | Inspector for any FMU | Yes | Yes |
+| Share a model as a link | Yes | No |
 | Templates | Yes | Yes |
 | AI Assistant that writes, checks, simulates and fixes models | Yes (your Anthropic API key) | No |
 | Simulate the FMU in fmusim or FMPy | No | Yes |
 | Models importing packages Pyodide doesn't have (e.g. PyTorch) | No | Yes |
 | Where files live | This browser (download them, or export a .zip) | A folder on your computer |
+
+## Sharing models
+
+**Share link** in the editor copies a link that opens your model in anyone's browser,
+for a forum post, a GitHub issue or a colleague. The code travels inside the link, after
+the `#`, so it is never uploaded anywhere. Whoever opens the link sees the code first and
+chooses whether to open it, since it runs as Python in their browser.
+
+Links can also open a built-in example, e.g. `?example=bouncing_ball` (any template id).
+
+Link format, for tools that generate links: `#name=<file>.py&model=<code>`, where
+`<code>` is the file compressed with raw DEFLATE and encoded as base64url without padding.
+In Python:
+
+```python
+import base64, urllib.parse, zlib
+c = zlib.compressobj(9, zlib.DEFLATED, -15)
+data = c.compress(source.encode()) + c.flush()
+url = APP_URL + "#" + urllib.parse.urlencode(
+    {"name": "model.py", "model": base64.urlsafe_b64encode(data).decode().rstrip("=")})
+```
 
 ## The Assistant
 
